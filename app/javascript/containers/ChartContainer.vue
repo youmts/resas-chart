@@ -1,8 +1,16 @@
 <template>
   <div>
-    <b-form-select v-model="selectedPrefCode" :options="prefectures" value-field="prefCode" text-field="prefName" class="chart-container_pref-select">
-    </b-form-select>
-    <PrefecturePopulationChart v-if="!!populations" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
+    <b-row>
+      <b-col cols="2" class="p-4">
+        <b-form-group description="複数選択できます">
+          <b-form-select v-model="selectedPrefCodes" :options="prefectures" multiple value-field="prefCode" text-field="prefName" :select-size="20" class="chart-container_pref-select">
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+      <b-col>
+        <PrefecturePopulationChart v-if="!!populations" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -18,29 +26,25 @@ export default Vue.extend({
   data: function() {
     return {
       prefectures: [],
-      selectedPrefCode: null,
+      selectedPrefCodes: [],
       populations: null,
       apiCache: new Map()
     };
   },
   mounted: async function() {
-    await this.loadPrefectures()
+    this.prefectures = await this.loadPrefectures()
   },
   watch: {
-    selectedPrefCode: async function(newPrefCode) {
-      if (!newPrefCode) {
-        return;
-      }
+    selectedPrefCodes: async function(newPrefCodes) {
+      const datasets = await Promise.all(newPrefCodes.map(async (prefCode) => {
+        return {
+          label: this.findPrefName(prefCode),
+          data: await this.loadPopulations(prefCode),
+        };
+      }));
 
-      const data = await this.cachedGet(`/api/v1/prefectures/${newPrefCode}/populations`);
-      const array = data.map((item) => { return { x: item.year, y: item.value } });
       this.populations = {
-        datasets: [
-          {
-            label: this.findPrefName(newPrefCode),
-            data: array,
-          }
-        ]
+        datasets
       };
     }
   },
@@ -49,13 +53,11 @@ export default Vue.extend({
       return this.prefectures.find((prefecture) => prefecture.prefCode === prefCode).prefName;
     },
     loadPrefectures: async function() {
-      this.prefectures = [
-        {
-          prefCode: null,
-          prefName: '選択してください'
-        },
-        ...await this.cachedGet('/api/v1/prefectures')
-      ];
+      return await this.cachedGet('/api/v1/prefectures');
+    },
+    loadPopulations: async function(prefCode) {
+      const data = await this.cachedGet(`/api/v1/prefectures/${prefCode}/populations`);
+      return data.map((item) => { return { x: item.year, y: item.value } });
     },
     cachedGet: async function(path) {
       if(this.apiCache.has(path)) {
@@ -74,7 +76,7 @@ export default Vue.extend({
 <style lang="scss">
 
 .chart-container_pref-select {
-  width: 300px;
+  height: 500px;
 }
 
 .chart-container_pref-population-chart {
