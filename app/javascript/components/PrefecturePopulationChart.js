@@ -1,4 +1,5 @@
 import { Scatter, mixins } from 'vue-chartjs'
+import 'chartjs-plugin-colorschemes'
 const { reactiveProp } = mixins;
 
 export default {
@@ -10,6 +11,12 @@ export default {
         title: {
           display: true,
           text: '総人口'
+        },
+        plugins: {
+          colorschemes: {
+            scheme: 'brewer.PastelTwo8'
+
+          }
         }
       }
     };
