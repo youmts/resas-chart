@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  def request_resas(path)
+  def request_resas(path, params: nil)
     conn = Faraday.new(
       url: 'https://opendata.resas-portal.go.jp/api/v1',
       headers: { 'X-API-KEY': ENV['RESAS_API_KEY'] }
@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
       builder.response :logger, nil, { headers: false }
     end
 
-    response = conn.get(path)
+    response = conn.get(path, params)
 
     return JSON.parse(response.body)['result']
   end
