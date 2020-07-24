@@ -11,9 +11,13 @@ gem 'puma', '~> 4.1'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.2'
 gem 'sass-rails', '>= 6'
 gem 'webpacker', '~> 4.0'
+gem 'faraday'
+gem 'faraday-http-cache'
 
 group :development, :test do
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
+  gem 'dotenv-rails'
+  gem 'rubocop-rails'
 end
 
 group :development do
