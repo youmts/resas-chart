@@ -1,4 +1,4 @@
-class Api::V1::PopulationController < ApplicationController
+class Api::V1::PopulationsController < ApplicationController
   def index
     result = request_resas('population/composition/perYear', params: { prefCode: params[:prefecture_id], cityCode: '-' })
     total_population = result['data'][0]

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-import ChartContainer from '../container/ChartContainer.vue'
+import ChartContainer from '../containers/ChartContainer.vue'
 
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
