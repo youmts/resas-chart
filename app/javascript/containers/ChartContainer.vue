@@ -2,7 +2,7 @@
   <div>
     <b-form-select v-model="selectedPrefCode" :options="prefectures" value-field="prefCode" text-field="prefName" class="chart-container_pref-select">
     </b-form-select>
-    <PrefecturePopulationChart v-if="!!populations" :chartData="populations"></PrefecturePopulationChart>
+    <PrefecturePopulationChart v-if="!!populations" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
   </div>
 </template>
 
@@ -37,7 +37,7 @@ export default Vue.extend({
       this.populations = {
         datasets: [
           {
-            label: newPrefCode,
+            label: this.findPrefName(newPrefCode),
             data: array,
           }
         ]
@@ -45,8 +45,17 @@ export default Vue.extend({
     }
   },
   methods: {
+    findPrefName: function(prefCode) {
+      return this.prefectures.find((prefecture) => prefecture.prefCode === prefCode).prefName;
+    },
     loadPrefectures: async function() {
-      this.prefectures = await this.cachedGet('/api/v1/prefectures');
+      this.prefectures = [
+        {
+          prefCode: null,
+          prefName: '選択してください'
+        },
+        ...await this.cachedGet('/api/v1/prefectures')
+      ];
     },
     cachedGet: async function(path) {
       if(this.apiCache.has(path)) {
@@ -66,6 +75,10 @@ export default Vue.extend({
 
 .chart-container_pref-select {
   width: 300px;
+}
+
+.chart-container_pref-population-chart {
+  width: 600px;
 }
 
 </style>
