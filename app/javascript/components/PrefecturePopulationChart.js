@@ -32,6 +32,7 @@ export default {
   methods: {
     render: function() {
       this.renderChart(
+        // NOTE: showLine: true など、固有の設定を追加して描画に用いる
         this.transformChartData(this.chartData),
         this.options
       );

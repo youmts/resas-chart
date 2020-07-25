@@ -9,7 +9,7 @@
         </b-list-group>
       </b-col>
       <b-col>
-        <PrefecturePopulationChart v-if="populations.datasets.length > 0" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
+        <PrefecturePopulationChart v-if="populations && populations.datasets.length > 0" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
       </b-col>
     </b-row>
   </div>
@@ -19,6 +19,7 @@
 import Vue from "vue";
 import axios from "axios";
 import PrefecturePopulationChart from "../components/PrefecturePopulationChart"
+import { loadPrefectures, loadPopulations } from '../lib/loadFromApi'
 
 export default Vue.extend({
   components: {
@@ -59,21 +60,12 @@ export default Vue.extend({
       return this.prefectures.find((prefecture) => prefecture.prefCode === prefCode).prefName;
     },
     loadPrefectures: async function() {
-      const data = await this.cachedGet('/api/v1/prefectures');
+      const data = await loadPrefectures();
       return data.map((item) => { return { ...item, selected: false } });
     },
     loadPopulations: async function(prefCode) {
-      const data = await this.cachedGet(`/api/v1/prefectures/${prefCode}/populations`);
+      const data = await loadPopulations(prefCode);
       return data.map((item) => { return { x: item.year, y: item.value } });
-    },
-    cachedGet: async function(path) {
-      if(this.apiCache.has(path)) {
-        return this.apiCache.get(path);
-      }
-
-      const { data } = await axios.get(path);
-      this.apiCache.set(path, data);
-      return data;
     },
     handleSelectPref: function(pref) {
       pref.selected = !pref.selected;
