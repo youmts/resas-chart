@@ -11,7 +11,15 @@ class ApplicationController < ActionController::Base
     end
 
     response = conn.get(path, params)
+    json_body = JSON.parse(response.body)
 
-    return JSON.parse(response.body)['result']
+    # NOTE: エラーの場合も200になるが、statucCodeが定義されている
+    # TODO: 429(Too Many Requests)の場合にリトライ
+    # SEE: https://opendata.resas-portal.go.jp/docs/api/v1/detail/index.html
+    if json_body['statusCode']
+      raise StandardError.new, json_body
+    end
+
+    return json_body['result']
   end
 end
