@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col cols="2" class="p-4">
-        <b-list-group>
+        <b-list-group class="chart-container_pref-list">
           <b-list-group-item v-for="pref in prefectures" :key="pref.prefCode" :active="pref.selected" button @click="handleSelectPref(pref)">
             {{pref.prefName}}
           </b-list-group-item>
@@ -85,10 +85,10 @@ export default Vue.extend({
 
 <style lang="scss">
 
-.chart-container_pref-select {
-  height: 500px;
+.chart-container_pref-list {
+  height: calc(100vh - 50px);
+  overflow: scroll;
 }
-
 .chart-container_pref-population-chart {
   width: 600px;
 }
