@@ -2,13 +2,14 @@
   <div>
     <b-row>
       <b-col cols="2" class="p-4">
-        <b-form-group description="複数選択できます">
-          <b-form-select v-model="selectedPrefCodes" :options="prefectures" multiple value-field="prefCode" text-field="prefName" :select-size="20" class="chart-container_pref-select">
-          </b-form-select>
-        </b-form-group>
+        <b-list-group>
+          <b-list-group-item v-for="pref in prefectures" :key="pref.prefCode" :active="pref.selected" button @click="handleSelectPref(pref)">
+            {{pref.prefName}}
+          </b-list-group-item>
+        </b-list-group>
       </b-col>
       <b-col>
-        <PrefecturePopulationChart v-if="!!populations" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
+        <PrefecturePopulationChart v-if="populations.datasets.length > 0" :chartData="populations" class="chart-container_pref-population-chart"></PrefecturePopulationChart>
       </b-col>
     </b-row>
   </div>
@@ -26,7 +27,6 @@ export default Vue.extend({
   data: function() {
     return {
       prefectures: [],
-      selectedPrefCodes: [],
       populations: null,
       apiCache: new Map()
     };
@@ -34,12 +34,18 @@ export default Vue.extend({
   mounted: async function() {
     this.prefectures = await this.loadPrefectures()
   },
+  computed: {
+    selectedPrefectures: function () {
+      return this.prefectures.filter((pref) => pref.selected)
+    }
+  },
   watch: {
-    selectedPrefCodes: async function(newPrefCodes) {
-      const datasets = await Promise.all(newPrefCodes.map(async (prefCode) => {
+    selectedPrefectures: async function(newPrefs) {
+      // NOTE: computed内でasyncが使えないので、watchでpopulationsをリアクティブに更新する
+      const datasets = await Promise.all(newPrefs.map(async (pref) => {
         return {
-          label: this.findPrefName(prefCode),
-          data: await this.loadPopulations(prefCode),
+          label: pref.prefName,
+          data: await this.loadPopulations(pref.prefCode),
         };
       }));
 
@@ -53,7 +59,8 @@ export default Vue.extend({
       return this.prefectures.find((prefecture) => prefecture.prefCode === prefCode).prefName;
     },
     loadPrefectures: async function() {
-      return await this.cachedGet('/api/v1/prefectures');
+      const data = await this.cachedGet('/api/v1/prefectures');
+      return data.map((item) => { return { ...item, selected: false } });
     },
     loadPopulations: async function(prefCode) {
       const data = await this.cachedGet(`/api/v1/prefectures/${prefCode}/populations`);
@@ -67,7 +74,10 @@ export default Vue.extend({
       const { data } = await axios.get(path);
       this.apiCache.set(path, data);
       return data;
-    }
+    },
+    handleSelectPref: function(pref) {
+      pref.selected = !pref.selected;
+    },
   }
 })
 
