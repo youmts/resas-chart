@@ -75,7 +75,7 @@ export default Vue.extend({
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped="true">
 
 .chart-container_pref-list {
   height: calc(100vh - 50px);
